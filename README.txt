@@ -1,2 +1,2 @@
 # Journal
-Desktop application for keep eye daily expense in very efficient way
+Desktop application for keep eye on daily expense in very efficient way
