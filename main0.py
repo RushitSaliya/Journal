@@ -5,8 +5,8 @@ try:
     file=open("Data.csv","r")
 except:
     with open("Data.csv","w") as file:
-     file.write("id,date,type,product,quantity,price_per_unit,description\n")
-     file.close()
+        file.write("Id,Date,Type,Product,Quantity,Price_Per_Unit,Total_Price,Description\n")
+        file.close()
 
 
 class Entry:
@@ -16,7 +16,8 @@ class Entry:
         self.price_per_unit=0.0
         self.description=None
         self.type_of_entry=None
-        self.date=None               #default initialization
+        self.date=None
+        self.total_price=0.0               #default initialization
 
     def set_product_name(self,product_name):
         self.product_name = product_name
@@ -33,13 +34,14 @@ class Entry:
     def set_date(self,date):
         self.date=date
 
+    def set_total_price(self):
+        self.total_price = (self.price_per_unit * self.quantity)
+
     """
     entry():
-
     method to write the entry in the file and will be called at last after setting all the attributes
-
     if anything goes wrong in setting the attributes and is not handled by code
-    then just don't call the method entry will not be added to the file
+    then just don't call the method, entry will not be added to the file
     """
     def entry(self):
         file=open("Data.csv","r+")
@@ -48,11 +50,10 @@ class Entry:
          lastid=0
         else:
          lastid=int(list[-1].split(",")[0])
-        file.write(str(lastid+1) +"," +str(self.date)+","+ str(self.type_of_entry) + "," + str(self.product_name) + "," + str(self.quantity) + "," + str(self.price_per_unit) + "," +str(self.description) + "\n")
+        file.write(str(lastid+1) +"," +str(self.date)+","+ str(self.type_of_entry) + "," + str(self.product_name) + "," + str(self.quantity) + "," + str(self.price_per_unit) + "," + str(self.total_price) + "," +str(self.description) + "\n")
 
     """
     delete(index)
-
     method to delete the entry and is to be called with "index" parameter i.e. id of entry that you
     want to delete
     """
@@ -99,6 +100,7 @@ while True:
         e.set_date(input("Date:\n"))
         e.set_quantity(int(input("Quantity:\n")))
         e.set_price_per_unit(float(input("Price per Unit:\n")))
+        e.set_total_price()
         e.set_description(input("Description:\n"))
         e.entry()
     except ValueError:
