@@ -1,11 +1,20 @@
-
+from datetime import datetime
+from dateutil.parser import parse
 import pandas as pd
+
 file=None
 try:
     file=open("Data.csv","r")
 except:
     with open("Data.csv","w") as file:
      file.write("Date,Type,Product,Quantity,Price_Per_Unit,Total_Price,Description\n")
+     file.close()
+
+try:
+    file=open("dataToDoList.csv","r")
+except:
+    with open("dataToDoList.csv","w+") as file:
+     file.write("Time,Description\n")          #file for data entry of remainders
      file.close()
 
 
@@ -73,11 +82,76 @@ class Sell(Entry):
         self.type_of_entry="Sell"
 
 
+class ToDo:
+    tasks={}
+    def __init__(self):
+        self.day=datetime.now().day
+        self.month=datetime.now().month
+        self.year=datetime.now().year
+        self.hour=datetime.now().hour
+        self.minute=datetime.now().minute
+        self.description=None                  #default initialization(current time)
+
+    def set_day(self,day):
+        self.day=day
+
+    def set_month(self,month):
+        self.month=month
+
+    def set_year(self,year):
+        self.year=year
+
+    def set_hour(self,hour):
+        self.hour=hour
+
+    def set_minute(self,minute):
+        self.minute=minute
+
+    def set_description(self,description):
+        self.description=description            #setter methods for giving time of remainders
+
+    @staticmethod
+    def delete_task(index):
+        file = pd.read_csv("dataToDoList.csv", index_col=None)
+        try:
+            file.drop(file.index[index], inplace=True)
+        except IndexError:
+            print("Index out of bound...!!!")
+        file.to_csv("dataToDoList.csv", index=False)
+
+
+    """
+    remind() function will notify for reminders at or after little time of entry and should be called
+    at pertiular duration continuously
+    """
+    @staticmethod
+    def remind():
+        with open("dataToDoList.csv", "r") as file:
+            reader=file.readlines()[1:]
+            for rows in reader:
+               ToDo.tasks[(rows.split(",")[0])]=rows.split(",")[1]
+
+        for key in sorted(ToDo.tasks.keys()):
+            if parse(key) <= datetime.now():
+                print(ToDo.tasks[key])
+            else:
+                break
+
+    """
+    add_task() will write the entry of reminder in file 
+    """
+    def add_task(self):
+        with open("dataToDoList.csv", "a") as file:
+            file.write(str(datetime(day=self.day,month=self.month,year=self.year,hour=self.hour,minute=self.minute))+","+str(self.description)+"\n")
+            file.close()
+
+
 while True:
-    print("\nsell:1\nbuy:2\ndelete:3\nexit:4\n")
-    print(pd.read_csv("Data.csv"))
+    print("======================================================")
+    print("\n1:sell\n2:buy\n3:delete\n4:Add task in ToDo\n5:Delete task in ToDo\n6:Remind tasks\n7:exit\n")
     c=int(input(":"))
     e=None
+    t=ToDo()
     if c==1:
         e=Sell()
     elif c==2:
@@ -86,7 +160,19 @@ while True:
         index = int(input("Enter id of entry to delete:"))
         Entry.delete(index)
         continue
+    elif c==4:
+        t.set_minute(int(input("Enter minute:")))  # you can set hour,month,year by calling their respective setter methods
+        t.set_description(input("Enter Description:"))
+        t.add_task()
+        continue
+    elif c==5:
+        t.delete_task(int(input("Enter id:")))
+        continue
+    elif c==6:
+        t.remind()
+        continue
     else:
+        print("======================================================\n")
         exit(0)
 
     try:
