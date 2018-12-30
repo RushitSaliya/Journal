@@ -7,7 +7,7 @@ try:
     file=open("Data.csv","r")
 except:
     with open("Data.csv","w") as file:
-        file.write("Id,Date,Type,Product,Quantity,Price_Per_Unit,Total_Price,Description\n")
+        file.write("Date,Type,Product,Quantity,Price_Per_Unit,Total_Price,Description\n")
         file.close()
 
 try:
