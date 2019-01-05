@@ -43,7 +43,7 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
                                  5: "Total_Price", 6: "Description"}
 
         # to assign column name to table
-        self.tbl_widget_existing_records.setHorizontalHeaderLabels(["Date", "Type", "Product", "Quantity",
+        self.tbl_widget_existing_records.setHorizontalHeaderLabels(["Date", "Type", "Product Name", "Quantity",
                                                                     "Price per Unit", "Total Price", "Description"])
 
         # when we want to write content from file to table...
