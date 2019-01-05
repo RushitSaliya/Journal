@@ -1,11 +1,10 @@
 # imported all built-in modules
 from PyQt5.QtWidgets import *
-import sys
 import csv
 
 # imported files, which is made by the ARTISTS (If you know what I mean...🤙)
 from main0 import *
-# from main1 import *
+from main1 import *
 
 # imported modules which locally located within Py_Scripts directory
 from Py_Scripts \
@@ -23,9 +22,11 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
 
         # declaration of all instance variables
         self.add_record_dialog_object = ClassAddRecordDialog()
+        self.self_object = None   # instance variable for showing window again with fresh content
 
         # calls of event handlers
         self.btn_add_record.clicked.connect(self.pop_up_add_record_dialog)
+        self.btn_refresh.clicked.connect(self.refresh_record)
 
         # to count number of rows in Data.csv file in order to write it in tabular form
         with open("Data.csv", "r") as file_of_main2:
@@ -58,6 +59,14 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
         self.add_record_dialog_object.retranslateUi(self.add_record_dialog_object)
         self.add_record_dialog_object.show()
 
+    def refresh_record(self):
+        """In order to re-load fresh data of MainWindow into table"""
+
+        self.close()
+        self.self_object = ClassMainWindow()    # specified ClassName here because I'm afraid of MaximumRecursiveError 😱
+        self.self_object.retranslateUi(self.self_object)
+        self.self_object.show()
+
 
 class ClassAddRecordDialog(QDialog, AddRecordDialog.Ui_AddRecordDialog):
     """Class of Add Record Dialog"""
@@ -73,7 +82,7 @@ class ClassAddRecordDialog(QDialog, AddRecordDialog.Ui_AddRecordDialog):
 
         # calls of event handlers
         self.btn_add.clicked.connect(self.write_entered_record_to_file)
-        self.btn_add.clicked.connect(self.hide)
+        self.btn_add.clicked.connect(self.close)
 
     # definitions of event handlers
     def write_entered_record_to_file(self):
