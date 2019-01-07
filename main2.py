@@ -1,6 +1,6 @@
 # imported all built-in modules
 from PyQt5.QtWidgets import *
-from PyQt5 import QtWidgets
+from PyQt5 import QtGui, QtCore, QtWidgets
 import csv
 
 # imported files, which is made by the ARTISTS (If you know what I mean...🤙)
@@ -31,6 +31,16 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
         self.btn_add_record.clicked.connect(self.pop_up_add_record_dialog)
         self.btn_refresh.clicked.connect(self.refresh_record)
         self.btn_delete_record.clicked.connect(self.pop_up_delete_record_dialog)
+
+        # assigned shortcuts to some reputed actions which has high frequency of usage
+        self.shortcut1 = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_R), self)
+        self.shortcut1.activated.connect(self.refresh_record)
+
+        self.shortcut2 = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_A), self)
+        self.shortcut2.activated.connect(self.pop_up_add_record_dialog)
+
+        self.shortcut3 = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_D), self)
+        self.shortcut3.activated.connect(self.pop_up_delete_record_dialog)
 
         # to count number of rows in Data.csv file in order to write it in tabular form
         with open("Data.csv", "r") as file_of_main2:
@@ -156,6 +166,12 @@ class ClassDeleteRecordDialog(QDialog, DeleteRecordDialog.Ui_DeleteRecordDialog)
         try:
             # static_method call for erasing record by just the straight way that we all love ( #StaticMethod 🤘_😍)
             Entry.delete(self.index_from_line_edit)
+
+            # to pop up success message after successful deletion of record
+            self.response_message.setWindowTitle("Success Message")
+            self.response_message.showMessage("Record deleted successfully 🙂 !!!")
+            self.response_message.show()
+
         except IndexError:
             # to pop up error message in case of Invalid Index
             self.response_message.setWindowTitle("Error Message")
