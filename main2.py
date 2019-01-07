@@ -122,10 +122,10 @@ class ClassAddRecordDialog(QDialog, AddRecordDialog.Ui_AddRecordDialog):
 
         # to paste filled data into file (Written this comment just for the sake of comment-protocol 😅)
         self.entry_obj.entry()
-        
+
         # to pop up success message after entering data into file
         self.response_message.setWindowTitle("Success Message")
-        self.response_message.showMessage("Record Added Successfully!!!")
+        self.response_message.showMessage("Record Added Successfully 🙂 !!!")
         self.response_message.show()
 
 
@@ -140,21 +140,29 @@ class ClassDeleteRecordDialog(QDialog, DeleteRecordDialog.Ui_DeleteRecordDialog)
 
         # declaration of all instance variables
         self.index_from_line_edit = int()
+        self.response_message = QtWidgets.QErrorMessage()
 
         # calls of event handlers
         self.btn_delete.clicked.connect(self.delete_record)
 
     # definition of event handlers
     def delete_record(self):
-        """When we want to just delete the record..."""
+        """When we want to just erase the record..."""
 
         # to fetch index that user has entered
         self.index_from_line_edit = int(self.line_edit_index.text()) - 1
 
-        # static_method call to erase record by just the straight way that we all love ( #StaticMethod 🤘_😍)
-        Entry.delete(self.index_from_line_edit)
+        # let us try first that the index that user has just entered is valid or not...!!!
+        try:
+            # static_method call for erasing record by just the straight way that we all love ( #StaticMethod 🤘_😍)
+            Entry.delete(self.index_from_line_edit)
+        except IndexError:
+            # to pop up error message in case of Invalid Index
+            self.response_message.setWindowTitle("Error Message")
+            self.response_message.showMessage("Invalid Index 😟 !!!")
+            self.response_message.show()
 
-        self.hide()
+        self.close()
 
 
 if __name__ == "__main__":
