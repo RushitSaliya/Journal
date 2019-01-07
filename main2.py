@@ -122,7 +122,8 @@ class ClassAddRecordDialog(QDialog, AddRecordDialog.Ui_AddRecordDialog):
 
         # to paste filled data into file (Written this comment just for the sake of comment-protocol 😅)
         self.entry_obj.entry()
-
+        
+        # to pop up success message after entering data into file
         self.response_message.setWindowTitle("Success Message")
         self.response_message.showMessage("Record Added Successfully!!!")
         self.response_message.show()
@@ -150,7 +151,7 @@ class ClassDeleteRecordDialog(QDialog, DeleteRecordDialog.Ui_DeleteRecordDialog)
         # to fetch index that user has entered
         self.index_from_line_edit = int(self.line_edit_index.text()) - 1
 
-        # static_method call to erase record just the straight way we love ( #StaticMethod 🤘😍)
+        # static_method call to erase record by just the straight way that we all love ( #StaticMethod 🤘_😍)
         Entry.delete(self.index_from_line_edit)
 
         self.hide()
