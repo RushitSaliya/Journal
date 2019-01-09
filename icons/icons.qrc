@@ -1,0 +1,12 @@
+<RCC>
+	<qresource>
+		<file>Statistics.png</file>
+		<file>Suggestions.png</file>
+		<file>Contact_us.png</file>
+		<file>About_us.png</file>
+		<file>Todo.png</file>
+		<file>Add_record.png</file>
+		<file>Delete_record.png</file>
+		<file>Refresh.png</file>
+	</qresource>
+</RCC>
