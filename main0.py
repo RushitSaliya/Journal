@@ -19,49 +19,35 @@ except FileNotFoundError:
 
 
 class Entry:
-    def __init__(self):
-        self.product_name = None
-        self.quantity = None
-        self.price_per_unit = None
-        self.total_price = None
-        self.description = None
-        self.type_of_entry = None
-        self.date = None  # default initialization
+    total_buy = 0.0
+    total_sell = 0.0
 
-    def set_product_name(self, product_name):
+    def __init__(self, date, type_of_entry, product_name, quantity, price_per_unit, description):
         self.product_name = product_name
-
-    def set_quantity(self, quantity):
         self.quantity = quantity
-
-    def set_price_per_unit(self, price_per_unit):
         self.price_per_unit = price_per_unit
-
-    def set_description(self, description):
+        self.total_price = None
         self.description = description
-
-    def set_date(self, date):
+        self.type_of_entry = type_of_entry
         self.date = date
 
     """
     entry():
-
     method to write the entry in the file and will be called at last after setting all the attributes
-
     if anything goes wrong in setting the attributes and is not handled by code
     then just don't call the method, entry will not be added to the file
     """
 
     def entry(self):
-        file = open("Data.csv", "a")
+        datafile = open("Data.csv", "a")
         if self.type_of_entry == 'Buy':
             self.total_price = -(self.quantity * self.price_per_unit)
         else:
             self.total_price = (self.quantity * self.price_per_unit)
-        file.write(str(self.date) + "," + str(self.type_of_entry) + "," + str(self.product_name) + "," + str(
+        datafile.write(str(self.date) + "," + str(self.type_of_entry) + "," + str(self.product_name) + "," + str(
             self.quantity) + "," + str(self.price_per_unit) + "," + str(self.total_price) + "," + str(
             self.description) + "\n")
-        file.close()
+        datafile.close()
 
     """
     delete(index)
@@ -70,22 +56,23 @@ class Entry:
     """
 
     @staticmethod
-    def delete(index):
-        file = pd.read_csv("Data.csv", index_col=None)
-        file.drop(file.index[index], inplace=True)
-        file.to_csv("Data.csv", index=False)
+    def delete(delete_index):
+        datafile = pd.read_csv("Data.csv", index_col=None)
+        datafile.drop(datafile.index[delete_index], inplace=True)
+        datafile.to_csv("Data.csv", index=False)
 
-
-class Buy(Entry):
-    def __init__(self):
-        Entry.__init__(self)
-        self.type_of_entry = "Buy"
-
-
-class Sell(Entry):
-    def __init__(self):
-        Entry.__init__(self)
-        self.type_of_entry = "Sell"
+    """
+    total_buy_sell():
+    it will update two class variables buydata & selldata which are total of buy & sell respectively...
+    should be called with each entry
+    """
+    @staticmethod
+    def total_buy_sell():
+        datafile = pd.read_csv("Data.csv")
+        buydata = datafile.where(datafile["Type"] == "Buy").iloc[:, 5]
+        selldata = datafile.where(datafile["Type"] == "Sell").iloc[:, 5]
+        Entry.total_buy = -buydata.sum()
+        Entry.total_sell = selldata.sum()
 
 
 class ToDo:
@@ -118,13 +105,13 @@ class ToDo:
         self.description = description  # setter methods for giving time of remainders
 
     @staticmethod
-    def delete_task(index):
-        file = pd.read_csv("dataToDoList.csv", index_col=None)
+    def delete_task(delete_task_index):
+        tododatafile = pd.read_csv("dataToDoList.csv", index_col=None)
         try:
-            file.drop(file.index[index], inplace=True)
+            tododatafile.drop(tododatafile.index[delete_task_index], inplace=True)
         except IndexError:
             print("Index out of bound...!!!")
-        file.to_csv("dataToDoList.csv", index=False)
+        tododatafile.to_csv("dataToDoList.csv", index=False)
 
     """
     remind() function will notify for reminders at or after little time of entry and should be called
@@ -133,8 +120,8 @@ class ToDo:
 
     @staticmethod
     def remind():
-        with open("dataToDoList.csv", "r") as file:
-            reader = file.readlines()[1:]
+        with open("dataToDoList.csv", "r") as tododatafile:
+            reader = tododatafile.readlines()[1:]
             for rows in reader:
                 ToDo.tasks[(rows.split(",")[0])] = rows.split(",")[1]
 
@@ -143,16 +130,17 @@ class ToDo:
                 print(ToDo.tasks[key])
             else:
                 break
+        tododatafile.close()
 
     """
     add_task() will write the entry of reminder in file 
     """
 
     def add_task(self):
-        with open("dataToDoList.csv", "a") as file:
-            file.write(str(datetime(day=self.day, month=self.month, year=self.year, hour=self.hour,
-                                    minute=self.minute)) + "," + str(self.description) + "\n")
-            file.close()
+        with open("dataToDoList.csv", "a") as tododatafile:
+            tododatafile.write(str(datetime(day=self.day, month=self.month, year=self.year, hour=self.hour,
+                                            minute=self.minute)) + "," + str(self.description) + "\n")
+            tododatafile.close()
 
 
 """
@@ -160,12 +148,16 @@ if __name__ == "__main__":
     while True:
         print("======================================================")
         print("\n1:sell\n2:buy\n3:delete\n4:Add task in ToDo\n5:Delete task in ToDo\n6:Remind tasks\n7:exit\n")
+        Entry.total_buy_sell()
+        print("total sell =" + str(Entry.total_sell))
+        print("total buy =" + str(Entry.total_buy))
         c = int(input(":"))
         t = ToDo()
+        e_type_of_entry = None
         if c == 1:
-            e = Sell()
+            e_type_of_entry = "Sell"
         elif c == 2:
-            e = Buy()
+            e_type_of_entry = "Buy"
         elif c == 3:
             index = int(input("Enter id of entry to delete:"))
             Entry.delete(index)
@@ -185,13 +177,13 @@ if __name__ == "__main__":
         else:
             print("======================================================\n")
             exit(0)
-
         try:
-            e.set_product_name(input("Product Name:\n"))
-            e.set_date(input("Date:\n"))
-            e.set_quantity(int(input("Quantity:\n")))
-            e.set_price_per_unit(float(input("Price per Unit:\n")))
-            e.set_description(input("Description:\n"))
+            e_product_name = (input("Product Name:\n"))
+            e_date = (input("Date:\n"))
+            e_quantity = (int(input("Quantity:\n")))
+            e_price_per_unit = (float(input("Price per Unit:\n")))
+            e_description = (input("Description:\n"))
+            e = Entry(e_date, e_type_of_entry, e_product_name, e_quantity, e_price_per_unit, e_description)
             e.entry()
         except ValueError:
             print("Please enter values of proper type...")
