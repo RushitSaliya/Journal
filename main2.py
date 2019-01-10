@@ -1,5 +1,6 @@
 # imported all built-in modules
 from PyQt5.QtWidgets import *
+from PyQt5.QtGui import QFont
 from PyQt5 import QtGui, QtCore, QtWidgets
 import csv
 
@@ -18,9 +19,20 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
     def __init__(self):
         """Constructor with no legacy of parameter"""
 
+        # noinspection PyArgumentList
         QMainWindow.__init__(self)
         self.setupUi(self)
         self.showMaximized()
+
+        # for updating date label right on MainWindow
+        self.lbl_date.setText("Date: " + str(datetime.now().date()) + "\n      (YYYY-MM-DD)")
+        self.lbl_date.setFont(QFont('Arial', 20))   # we have to update a label's font after doing explicit modification on it
+
+        self.lbl_buy.setText("Buy: " + str(Entry.total_buy_method()))
+        self.lbl_buy.setFont(QFont('Arial', 20))
+
+        self.lbl_sell.setText("Sell: " + str(Entry.total_sell_method()))
+        self.lbl_sell.setFont(QFont('Arial', 20))
 
         # declaration of all instance variables
         self.add_record_dialog_object = ClassAddRecordDialog()
@@ -34,12 +46,15 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
 
         # assigned shortcuts to some reputed actions which has high frequency of usage
         self.shortcut1 = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_R), self)
+        # noinspection PyUnresolvedReferences
         self.shortcut1.activated.connect(self.refresh_record)
 
         self.shortcut2 = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_A), self)
+        # noinspection PyUnresolvedReferences
         self.shortcut2.activated.connect(self.pop_up_add_record_dialog)
 
         self.shortcut3 = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_D), self)
+        # noinspection PyUnresolvedReferences
         self.shortcut3.activated.connect(self.pop_up_delete_record_dialog)
 
         # to count number of rows in Data.csv file in order to write it in tabular form
@@ -54,7 +69,7 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
         # to set specific column width of table widget (column_index, size)
         self.tbl_widget_existing_records.setColumnWidth(0, 70)
         self.tbl_widget_existing_records.setColumnWidth(1, 60)
-        self.tbl_widget_existing_records.setColumnWidth(3, 60)  # third column (index2) is by default well-settled by born
+        self.tbl_widget_existing_records.setColumnWidth(3, 60)  # third column (index2) is by default well-settled
         self.tbl_widget_existing_records.setColumnWidth(4, 85)
         self.tbl_widget_existing_records.setColumnWidth(5, 85)
         self.tbl_widget_existing_records.setColumnWidth(6, 600)
@@ -87,7 +102,18 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
         self.close()
         self.self_object = ClassMainWindow()    # specified ClassName here because I'm afraid of MaximumRecursiveError 😱
         self.self_object.retranslateUi(self.self_object)
+
         self.self_object.showMaximized()
+
+        # for updating date label right on MainWindow
+        self.self_object.lbl_date.setText("Date: " + str(datetime.now().date()) + "\n      (YYYY-MM-DD)")
+        self.self_object.lbl_date.setFont(QFont('Arial', 20))  # we have to update a label's font after doing explicit modification on it
+
+        self.self_object.lbl_buy.setText("Buy: " + str(Entry.total_buy_method()))
+        self.self_object.lbl_buy.setFont(QFont('Arial', 20))
+
+        self.self_object.lbl_sell.setText("Sell: " + str(Entry.total_sell_method()))
+        self.self_object.lbl_sell.setFont(QFont('Arial', 20))
 
     def pop_up_delete_record_dialog(self):
         """This block of code is responsible for popping up the DeleteRecordDialog. That's what exactly we call a method!!!"""
@@ -99,6 +125,7 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
 class ClassAddRecordDialog(QDialog, AddRecordDialog.Ui_AddRecordDialog):
     """Class of Add Record Dialog"""
 
+    # noinspection PyArgumentList
     def __init__(self):
         """Meet, Default constructor itself!!!"""
 
@@ -106,7 +133,7 @@ class ClassAddRecordDialog(QDialog, AddRecordDialog.Ui_AddRecordDialog):
         self.setupUi(self)
 
         # declaration of all instance variables
-        self.entry_obj = Entry()
+        self.entry_obj = None
         self.response_message = QtWidgets.QErrorMessage()  # instance variable for showing response message at the time of adding data
 
         # calls of event handlers
@@ -119,18 +146,16 @@ class ClassAddRecordDialog(QDialog, AddRecordDialog.Ui_AddRecordDialog):
         """Event handler for writing entered data to file"""
 
         # to paste the data to the respective instance variables
-        self.entry_obj.set_date(self.date_edit_date.text())
-        self.entry_obj.set_product_name(self.line_edit_name_of_product.text())
-        self.entry_obj.set_quantity(int(self.line_edit_quantity.text()))
-        self.entry_obj.set_price_per_unit(int(self.line_edit_price_per_unit.text()))
-        self.entry_obj.set_description(self.text_edit_description.toPlainText())
+        self.entry_obj = Entry(date=self.date_edit_date.text(), product_name=self.line_edit_name_of_product.text(),
+                               quantity=int(self.line_edit_quantity.text()), price_per_unit=int(self.line_edit_price_per_unit.text()),
+                               description=self.text_edit_description.toPlainText())
 
         if self.radio_btn_buy.isChecked():
             self.entry_obj.type_of_entry = "Buy"
         elif self.radio_btn_sell.isChecked():
             self.entry_obj.type_of_entry = "Sell"
 
-        # to paste filled data into file (Written this comment just for the sake of comment-protocol 😅)
+        # to paste filled data into file from Ui_Elements (Written this comment just for the sake of comment-protocol 😅)
         self.entry_obj.entry()
 
         # to pop up success message after entering data into file
@@ -142,6 +167,7 @@ class ClassAddRecordDialog(QDialog, AddRecordDialog.Ui_AddRecordDialog):
 class ClassDeleteRecordDialog(QDialog, DeleteRecordDialog.Ui_DeleteRecordDialog):
     """Here (in this class) we are suppose to manage the task of deleting file's existing data"""
 
+    # noinspection PyArgumentList
     def __init__(self):
         """😁 (fair enough!!!)"""
 
@@ -184,5 +210,5 @@ class ClassDeleteRecordDialog(QDialog, DeleteRecordDialog.Ui_DeleteRecordDialog)
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     JOURNAL = ClassMainWindow()
-    JOURNAL.show()
+    JOURNAL.showMaximized()
     app.exec_()
