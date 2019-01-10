@@ -22,7 +22,7 @@ class Entry:
     total_buy = 0.0
     total_sell = 0.0
 
-    def __init__(self, date, type_of_entry, product_name, quantity, price_per_unit, description):
+    def __init__(self, date="", type_of_entry="", product_name="", quantity=0, price_per_unit=0.0, description=""):
         self.product_name = product_name
         self.quantity = quantity
         self.price_per_unit = price_per_unit
