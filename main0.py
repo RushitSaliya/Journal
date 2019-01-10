@@ -67,12 +67,18 @@ class Entry:
     should be called with each entry
     """
     @staticmethod
-    def total_buy_sell():
+    def total_buy_method():
         datafile = pd.read_csv("Data.csv")
         buydata = datafile.where(datafile["Type"] == "Buy").iloc[:, 5]
-        selldata = datafile.where(datafile["Type"] == "Sell").iloc[:, 5]
         Entry.total_buy = -buydata.sum()
+        return Entry.total_buy
+
+    @staticmethod
+    def total_sell_method():
+        datafile = pd.read_csv("Data.csv")
+        selldata = datafile.where(datafile["Type"] == "Sell").iloc[:, 5]
         Entry.total_sell = selldata.sum()
+        return Entry.total_sell
 
 
 class ToDo:
