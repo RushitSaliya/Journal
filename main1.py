@@ -94,8 +94,10 @@ class ProfitCanvas(FingureCanvas):
         ax.set_title('Product wise profit')
         ax.set_xlabel('Product')
         ax.set_ylabel('Profit in ₹')
-        
-app = QApplication(sys.argv)
-window = Window()
-window.show()
-app.exec()
+ 
+
+if __name__ == "__main__":
+    app = QApplication(sys.argv)
+    window = Window()
+    window.show()
+    app.exec()
