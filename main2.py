@@ -10,7 +10,43 @@ from main1 import *
 
 # imported modules which locally located within Py_Scripts directory
 from Py_Scripts \
-    import MainWindow, AddRecordDialog, DeleteRecordDialog
+    import MainWindow, AddRecordDialog, DeleteRecordDialog, SignInDialog
+
+
+class ClassSignInDialog(QDialog, SignInDialog.Ui_SignInDialog):
+    """Class of SignIN dialog for validating user-credentials"""
+
+    def __init__(self):
+        """I don't have anything to say here :)"""
+
+        QDialog.__init__(self)
+        self.setupUi(self)
+        self.show()
+
+        # declaration of all instance variables
+        self.start_app_obj = None
+        self.response_message = QtWidgets.QErrorMessage()
+
+        # calls of event handlers
+        self.btn_Sign_in.clicked.connect(self.start_application)
+
+    def start_application(self):
+        """If user has entered valid credentials then he/she is more then welcome to this application"""
+
+        if self.line_edit_username.text() == "RushitSaliya" and self.line_edit_password.text() == "1234":
+            self.start_app_obj = ClassMainWindow()
+            self.start_app_obj.retranslateUi(self.start_app_obj)
+            self.start_app_obj.show()
+            self.close()
+        else:
+            self.response_message.setWindowTitle("Error Message")
+            self.response_message.showMessage("Invalid Username or Password 😟 !!!")
+            self.response_message.show()
+            self.line_edit_username.clear()
+            self.line_edit_password.clear()
+
+            # After entering wrong username or password user must encountered with Username focused line-edit
+            self.line_edit_username.setFocus()
 
 
 class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
@@ -38,11 +74,13 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
         self.add_record_dialog_object = ClassAddRecordDialog()
         self.self_object = None   # instance variable for showing window again with fresh content
         self.delete_record_dialog_object = ClassDeleteRecordDialog()
+        self.graph_dialog = Window()
 
         # calls of event handlers
         self.btn_add_record.clicked.connect(self.pop_up_add_record_dialog)
         self.btn_refresh.clicked.connect(self.refresh_record)
         self.btn_delete_record.clicked.connect(self.pop_up_delete_record_dialog)
+        self.btn_statistics.clicked.connect(self.pop_up_statistics_dialog)
 
         # assigned shortcuts to some reputed actions which has high frequency of usage
         self.shortcut1 = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_R), self)
@@ -56,6 +94,10 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
         self.shortcut3 = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_D), self)
         # noinspection PyUnresolvedReferences
         self.shortcut3.activated.connect(self.pop_up_delete_record_dialog)
+
+        self.shortcut4 = QtWidgets.QShortcut(QtGui.QKeySequence(QtCore.Qt.Key_S), self)
+        # noinspection PyUnresolvedReferences
+        self.shortcut4.activated.connect(self.pop_up_statistics_dialog)
 
         # to count number of rows in Data.csv file in order to write it in tabular form
         with open("Data.csv", "r") as file_of_main2:
@@ -120,6 +162,9 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
 
         self.delete_record_dialog_object.retranslateUi(self.delete_record_dialog_object)
         self.delete_record_dialog_object.show()
+
+    def pop_up_statistics_dialog(self):
+        self.graph_dialog.show()
 
 
 class ClassAddRecordDialog(QDialog, AddRecordDialog.Ui_AddRecordDialog):
@@ -209,6 +254,6 @@ class ClassDeleteRecordDialog(QDialog, DeleteRecordDialog.Ui_DeleteRecordDialog)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    JOURNAL = ClassMainWindow()
-    JOURNAL.showMaximized()
+    JOURNAL = ClassSignInDialog()
+    JOURNAL.show()
     app.exec_()
