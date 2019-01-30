@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QFont
 from PyQt5 import QtGui, QtCore, QtWidgets
 import csv
+import sys
 
 # imported files, which is made by the ARTISTS (If you know what I mean...🤙)
 from main0 import *
@@ -10,7 +11,7 @@ from main1 import *
 
 # imported modules which locally located within Py_Scripts directory
 from Py_Scripts \
-    import MainWindow, AddRecordDialog, DeleteRecordDialog, SignInDialog
+    import MainWindow, AddRecordDialog, DeleteRecordDialog, SignInDialog, StatisticsWindow
 
 
 class ClassSignInDialog(QDialog, SignInDialog.Ui_SignInDialog):
@@ -33,10 +34,10 @@ class ClassSignInDialog(QDialog, SignInDialog.Ui_SignInDialog):
     def start_application(self):
         """If user has entered valid credentials then he/she is more then welcome to this application"""
 
-        if self.line_edit_username.text() == "RushitSaliya" and self.line_edit_password.text() == "1234":
+        if self.line_edit_username.text() == "12" and self.line_edit_password.text() == "12":
             self.start_app_obj = ClassMainWindow()
             self.start_app_obj.retranslateUi(self.start_app_obj)
-            self.start_app_obj.show()
+            self.start_app_obj.showMaximized()
             self.close()
         else:
             self.response_message.setWindowTitle("Error Message")
@@ -60,21 +61,23 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
         self.setupUi(self)
         self.showMaximized()
 
+        """
         # for updating date label right on MainWindow
-        self.lbl_date.setText("Date: " + str(datetime.now().date()) + "\n      (YYYY-MM-DD)")
-        self.lbl_date.setFont(QFont('Arial', 20))   # we have to update a label's font after doing explicit modification on it
+        self.lbl_date.setText("Date: " + str(datetime.now().date()) + "\n     (YYYY-MM-DD)")
+        self.lbl_date.setFont(QFont('Arial', 15))  # we have to update a label's font after doing explicit modification on it
 
         self.lbl_buy.setText("Buy: " + str(Entry.total_buy_method()))
-        self.lbl_buy.setFont(QFont('Arial', 20))
+        self.lbl_buy.setFont(QFont('Arial', 15))
 
         self.lbl_sell.setText("Sell: " + str(Entry.total_sell_method()))
-        self.lbl_sell.setFont(QFont('Arial', 20))
+        self.lbl_sell.setFont(QFont('Arial', 15))
+        """
 
         # declaration of all instance variables
         self.add_record_dialog_object = ClassAddRecordDialog()
         self.self_object = None   # instance variable for showing window again with fresh content
         self.delete_record_dialog_object = ClassDeleteRecordDialog()
-        self.graph_dialog = Window()
+        self.graph_dialog = ClassStatisticsWindow()
 
         # calls of event handlers
         self.btn_add_record.clicked.connect(self.pop_up_add_record_dialog)
@@ -148,14 +151,14 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
         self.self_object.showMaximized()
 
         # for updating date label right on MainWindow
-        self.self_object.lbl_date.setText("Date: " + str(datetime.now().date()) + "\n      (YYYY-MM-DD)")
-        self.self_object.lbl_date.setFont(QFont('Arial', 20))  # we have to update a label's font after doing explicit modification on it
+        self.self_object.lbl_date.setText("Date: " + str(datetime.now().date()) + "\n     (YYYY-MM-DD)")
+        self.self_object.lbl_date.setFont(QFont('Arial', 15))  # we have to update a label's font after doing explicit modification on it
 
         self.self_object.lbl_buy.setText("Buy: " + str(Entry.total_buy_method()))
-        self.self_object.lbl_buy.setFont(QFont('Arial', 20))
+        self.self_object.lbl_buy.setFont(QFont('Arial', 15))
 
         self.self_object.lbl_sell.setText("Sell: " + str(Entry.total_sell_method()))
-        self.self_object.lbl_sell.setFont(QFont('Arial', 20))
+        self.self_object.lbl_sell.setFont(QFont('Arial', 15))
 
     def pop_up_delete_record_dialog(self):
         """This block of code is responsible for popping up the DeleteRecordDialog. That's what exactly we call a method!!!"""
@@ -164,7 +167,8 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
         self.delete_record_dialog_object.show()
 
     def pop_up_statistics_dialog(self):
-        self.graph_dialog.show()
+        self.graph_dialog.retranslateUi(self.graph_dialog)
+        self.graph_dialog.showMaximized()
 
 
 class ClassAddRecordDialog(QDialog, AddRecordDialog.Ui_AddRecordDialog):
@@ -250,6 +254,22 @@ class ClassDeleteRecordDialog(QDialog, DeleteRecordDialog.Ui_DeleteRecordDialog)
             self.response_message.show()
 
         self.close()
+
+
+class ClassStatisticsWindow(QMainWindow, StatisticsWindow.Ui_StatisticsWindow):
+    """In this class poet wants to plot data on the graph by dividing them into Buy and Sell"""
+
+    def __init__(self):
+        """Default constructor for ClassStatisticsWindow"""
+
+        QMainWindow.__init__(self)
+        self.setupUi(self)
+
+        self.canvas = ExpenseCanvas(self, width=6, height=6)
+        self.canvas.move(50, 60)
+
+        self.canvas1 = ProfitCanvas(self, width=6, height=6)
+        self.canvas1.move(710, 60)
 
 
 if __name__ == "__main__":
