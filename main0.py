@@ -16,6 +16,7 @@ class Entry:
 
     def __init__(self, date="", type_of_entry="", product_name="", quantity=0, price_per_unit=0.0, description=""):
         """For initializing the parameters."""
+        
         self.product_name = product_name
         self.quantity = quantity
         self.price_per_unit = price_per_unit
@@ -26,6 +27,7 @@ class Entry:
 
     def entry(self):
         """This method will write an entry in the file and should be called at last after setting all the attributes"""
+        
         datafile = open("Data.csv", "a")
         if self.type_of_entry == 'Buy':
             self.total_price = -(self.quantity * self.price_per_unit)
@@ -39,6 +41,7 @@ class Entry:
     @staticmethod
     def delete(delete_index):
         """This will delete the entry at specified index i.e. delete_index parameter"""
+        
         datafile = pd.read_csv("Data.csv", index_col=None)
         datafile.drop(datafile.index[delete_index], inplace=True)
         datafile.to_csv("Data.csv", index=False)
@@ -46,6 +49,7 @@ class Entry:
     @staticmethod
     def total_buy_method():
         """This method will calculate total amount of purchase and must be called after each buy data entry..."""
+        
         datafile = pd.read_csv("Data.csv")
         buydata = datafile.where(datafile["Type"] == "Buy").iloc[:, 5]
         Entry.total_buy = -buydata.sum()
@@ -54,6 +58,7 @@ class Entry:
     @staticmethod
     def total_sell_method():
         """This method will calculate total amount of sell and must be called after each sell data entry..."""
+        
         datafile = pd.read_csv("Data.csv")
         selldata = datafile.where(datafile["Type"] == "Sell").iloc[:, 5]
         Entry.total_sell = selldata.sum()
