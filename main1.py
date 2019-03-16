@@ -8,7 +8,7 @@ class ExpenseCanvas(FigureCanvas):
     """A child which inherits lots of behaviours from parent to generate graph canvas 🙂"""
 
     def __init__(self, parent=None, width=5, height=5, dpi=100):
-        """"Well, that is where child uses inherited behaviours for his one and only aim of his life, embedding graph to canvas indeed !!😄""""
+        """Well, that is where child uses inherited behaviours for his one and only aim of his life, embedding graph to canvas indeed !!😄"""
 
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
