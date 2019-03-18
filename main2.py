@@ -3,12 +3,6 @@ from PyQt5 import QtGui, QtCore, QtWidgets
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import QFont
 from PyQt5.QtCore import Qt
-import csv
-import sys
-
-import matplotlib
-matplotlib.use('Qt5Agg')
-
 
 # imported file s, which is made by the ARTISTS (If you know what I mean...🤙)
 from main0 import *
@@ -17,6 +11,12 @@ from main1 import *
 # imported modules which locally located within Py_Scripts directory
 from Py_Scripts \
     import MainWindow, AddRecordDialog, DeleteRecordDialog, SignInDialog, StatisticsWindow, EstimationWindow
+
+import csv
+import sys
+
+import matplotlib
+matplotlib.use('Qt5Agg')
 
 
 class Methods:
@@ -321,7 +321,12 @@ class ClassEstimationWindow(QMainWindow,  EstimationWindow.Ui_EstimationWindow):
         self.figure = Figure(figsize=(12, 8), dpi=100)
         self.canvas = FigureCanvas(self.figure)
         self.canvas.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.gridLayout.addWidget(self.canvas, 5, 1, 5, 11)
+
+        self.scrollArea.setWidget(self.canvas)
+
+        # to plot "all items" for "1 month" initially
+        ClassEstimationWindow.result_dict = Entry.predict_profit()
+        self.plot()
 
         # declaration of event-handler
         self.btn_enterItem.clicked.connect(self.enter_item_to_list)
@@ -412,13 +417,27 @@ class ClassEstimationWindow(QMainWindow,  EstimationWindow.Ui_EstimationWindow):
         # TODO: temporarily passed value of products name_of_products instead of passing data from Data.csv
         ClassEstimationWindow.result_dict = Entry.predict_profit(from_this_day, from_this_month, from_this_year, to_this_day, to_this_month, to_this_year, items)
 
+        # to plot data according to provided duration of time
+        self.plot()
+
+    def plot(self):
+        """Method to plot predicted data on FigureCanvas"""
+
         self.figure.clear()
         ax = self.figure.add_subplot(111)
 
-        ax.bar([item for item in ClassEstimationWindow.result_dict], [ClassEstimationWindow.result_dict[item] for item in ClassEstimationWindow.result_dict])
+        x = [item for item in ClassEstimationWindow.result_dict]
+        y = [ClassEstimationWindow.result_dict[item] for item in ClassEstimationWindow.result_dict]
+        ax.bar(x, y)
+
         ax.set_title('Profit prediction')
         ax.set_xlabel('Product')
         ax.set_ylabel('Profit in ₹')
+        ax.set_xticklabels(labels=[item for item in ClassEstimationWindow.result_dict], rotation=90)    # to rotate ticks of X-axis for readability
+
+        # when we want to set fontsize according to requirement
+        for tick in ax.xaxis.get_major_ticks():
+            tick.label.set_fontsize(4.5)
 
         self.canvas.draw()
 
