@@ -23,7 +23,7 @@ class Methods:
     """This class is the collection of some handy methods. All the methods of this class are @staticmethod"""
 
     @staticmethod
-    def get_rows(path):
+    def getRows(path):
         """This method is for getting number of rows from the file"""
 
         with open(path, "r") as file_of_main2:
@@ -41,6 +41,25 @@ class Methods:
                 flag = True
         return flag
 
+    @staticmethod
+    def getValue(path, key=None, want_unique_value=False):
+        """This method is for fetching 'value' of a passed 'key' from a provided file. But this method can only be apply when passed key is already exists in file.
+        But here is a twist! If we want unique value to map with newly entered product-name then we have that luxury also! In that case just pass 'True' as an
+        third argument"""
+
+        dict_file = pd.read_csv(path)
+        rows = Methods.getRows(path)   # to calculate number of rows in the same file
+
+        if want_unique_value:
+            return dict_file.at[rows - 1, "value"] + 1
+        else:
+            for i in range(rows):
+                if key == dict_file.at[i, "product_name"]:
+                    result = int(dict_file.at[i, "value"])
+                    return result
+                else:
+                    continue
+
 
 class ClassSignInDialog(QDialog, SignInDialog.Ui_SignInDialog):
     """Class of SignIN dialog for validating user-credentials"""
@@ -48,6 +67,7 @@ class ClassSignInDialog(QDialog, SignInDialog.Ui_SignInDialog):
     def __init__(self):
         """I don't have anything to say here :)"""
 
+        # noinspection PyArgumentList
         QDialog.__init__(self)
         self.setupUi(self)
         self.show()
@@ -124,11 +144,8 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
         # noinspection PyUnresolvedReferences
         self.shortcut5.activated.connect(self.pop_up_estimation_window)
 
-        # to count number of rows in Data.csv file in order to write it in tabular form
-        rows = Methods.get_rows("Data.csv")
-
         # to set number of rows and columns of table
-        self.tbl_widget_existing_records.setRowCount(rows)
+        self.tbl_widget_existing_records.setRowCount(Methods.getRows("Data.csv"))
         self.tbl_widget_existing_records.setColumnCount(7)
 
         # to set specific column width of table widget (column_index, size)
@@ -149,7 +166,7 @@ class ClassMainWindow(QMainWindow, MainWindow.Ui_MainWindow):
                                                                     "Price per Unit", "Total Price", "Description"])
 
         # when we want to write content from file to table...
-        for i in range(rows):
+        for i in range(Methods.getRows("Data.csv")):
             for j in dict_index_to_headers:
                 self.value = str(file_of_data.at[i, dict_index_to_headers[j]])
                 self.tbl_widget_existing_records.setItem(i, j, QTableWidgetItem(self.value))
@@ -215,6 +232,20 @@ class ClassAddRecordDialog(QDialog, AddRecordDialog.Ui_AddRecordDialog):
         self.btn_add.clicked.connect(self.close)
         self.btn_cancel.clicked.connect(self.close)
 
+        # to set Buy radioButton checked initially
+        self.radio_btn_buy.setChecked(True)
+
+        # TODO: need to change source of data into following line from 'name_of_products' to 'strList'
+        self.completer = QCompleter(name_of_products, self.line_edit_name_of_product)
+
+        # when we want to set match option something like, "Tell me if you found this word (or character) even in between"
+        self.completer.setFilterMode(Qt.MatchContains)
+
+        self.completer.setModelSorting(QCompleter.CaseInsensitivelySortedModel)  # to make QCompleter CaseInsensitive
+        self.completer.setCaseSensitivity(Qt.CaseInsensitive)
+
+        self.line_edit_name_of_product.setCompleter(self.completer)  # to impose completer to lineEdit
+
     # definitions of event handlers
     def write_entered_record_to_file(self):
         """Event handler for writing entered data to file"""
@@ -228,6 +259,18 @@ class ClassAddRecordDialog(QDialog, AddRecordDialog.Ui_AddRecordDialog):
             self.entry_obj.type_of_entry = "Buy"
         elif self.radio_btn_sell.isChecked():
             self.entry_obj.type_of_entry = "Sell"
+
+        product_file = pd.read_csv("products.csv")
+        flag = False
+        for i in range(Methods.getRows("products.csv")):
+            if self.line_edit_name_of_product.text() == product_file.at[i, "product_name"]:
+                flag = True
+            else:
+                continue
+        if flag:
+            self.entry_obj.new_record = False
+        else:
+            self.entry_obj.new_record = True
 
         # to paste filled data into file from Ui_Elements (Written this comment just for the sake of comment-protocol 😅)
         self.entry_obj.entry()
@@ -287,6 +330,7 @@ class ClassStatisticsWindow(QMainWindow, StatisticsWindow.Ui_StatisticsWindow):
     def __init__(self):
         """Default constructor for ClassStatisticsWindow"""
 
+        # noinspection PyArgumentList
         QMainWindow.__init__(self)
         self.setupUi(self)
 
@@ -348,7 +392,7 @@ class ClassEstimationWindow(QMainWindow,  EstimationWindow.Ui_EstimationWindow):
             self.btn_removeItem.setVisible(True)
 
         # to set auto-completer to lineEdit_items
-        rows = Methods.get_rows("Data.csv")
+        rows = Methods.getRows("Data.csv")
 
         file_of_data = pd.read_csv("Data.csv")
 
