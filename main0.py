@@ -3,6 +3,7 @@ from datetime import timedelta
 import pandas as pd
 from Fill_dataset_2 import map, products_dict, name_of_products
 from Regression import model
+from main2 import Methods
 
 file = None
 
@@ -17,11 +18,12 @@ except FileNotFoundError:
 
 class Entry:
     total_buy = 0.0
-    total_sell = 0.0  # inititalization of static variables
+    total_sell = 0.0  # initialization of static variables
 
-    def __init__(self, date="", type_of_entry="", product_name="", quantity=0, price_per_unit=0.0, description=""):
+    def __init__(self, date="", type_of_entry="", product_name="", quantity=0, price_per_unit=0.0, description="", new_record=True):
         """For initializing the parameters."""
 
+        self.new_record = new_record
         self.product_name = product_name
         self.quantity = quantity
         self.price_per_unit = price_per_unit
@@ -33,14 +35,32 @@ class Entry:
     def entry(self):
         """This method will write an entry in the file and should be called at last after setting all the attributes"""
 
+        if self.new_record:
+            # that means if this condition satisfies then provided record is new one then we need to map a unique value to provided product-name
+
+            products_file = None
+            # in case of emergency (you know what I mean, right?)
+            try:
+                products_file = open("products.csv", "a")
+            except FileNotFoundError:
+                with open("products.csv", "w") as make_file:
+                    make_file.write("product_name,value\n")
+                    make_file.close()
+
+            # here we are going to map a unique number to entered product-name in terms of an incremented number of last element's value
+            products_file.write(self.product_name + "," + str(Methods.getValue(path="products.csv", key=self.product_name, want_unique_value=True)) + "\n")
+            products_file.close()
+        else:
+            # if this 'else' block gets executed, that means entered record is already existed. So we need not to perform any extra activity
+            pass
+
         datafile = open("Data.csv", "a")
         if self.type_of_entry == 'Buy':
             self.total_price = -(self.quantity * self.price_per_unit)
         else:
             self.total_price = (self.quantity * self.price_per_unit)
-        datafile.write(str(self.date) + "," + str(self.type_of_entry) + "," + str(self.product_name) + "," + str(
-            self.quantity) + "," + str(self.price_per_unit) + "," + str(self.total_price) + "," + str(
-            self.description) + "\n")
+        datafile.write(str(self.date) + "," + str(self.type_of_entry) + "," + str(self.product_name) + "," + str(self.quantity) + "," + str(self.price_per_unit) + "," +
+                       str(self.total_price) + "," + str(self.description) + "\n")
         datafile.close()
 
     @staticmethod
@@ -84,8 +104,8 @@ class Entry:
             predicted[product] = 0
             date = temp
             while date != lastdate + timedelta(days=1):
-                predicted[product] += float(model.predict([[date.day, date.month, date.year, products_dict[product],
-                                                            map[product][0], map[product][0] + map[product][1]]]))
+                predicted[product] += float(model.predict([[date.day, date.month, date.year, products_dict[product], map[product][0],
+                                                            map[product][0] + map[product][1]]]))
                 date += timedelta(days=1)
         return predicted
 
