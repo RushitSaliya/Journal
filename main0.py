@@ -3,6 +3,7 @@ from datetime import timedelta
 import pandas as pd
 from Fill_dataset_2 import map, products_dict, name_of_products
 from Regression import model
+
 from main2 import Methods
 
 file = None
@@ -15,12 +16,21 @@ except FileNotFoundError:
         file.write("Date,Type,Product,Quantity,Price_Per_Unit,Total_Price,Description\n")
         file.close()
 
+try:
+    with open("dataToDoList.csv", "r") as file:
+        file.close()
+except FileNotFoundError:
+    with open("dataToDoList.csv", "w") as file:
+        file.write("Time,Description\n")
+        file.close()
+
 
 class Entry:
     total_buy = 0.0
     total_sell = 0.0  # initialization of static variables
 
-    def __init__(self, date="", type_of_entry="", product_name="", quantity=0, price_per_unit=0.0, description="", new_record=True):
+    def __init__(self, date="", type_of_entry="", product_name="", quantity=0, price_per_unit=0.0, description="",
+                 new_record=True):
         """For initializing the parameters."""
 
         self.new_record = new_record
@@ -48,7 +58,8 @@ class Entry:
                     make_file.close()
 
             # here we are going to map a unique number to entered product-name in terms of an incremented number of last element's value
-            products_file.write(self.product_name + "," + str(Methods.getValue(path="products.csv", key=self.product_name, want_unique_value=True)) + "\n")
+            products_file.write(self.product_name + "," + str(
+                Methods.getValue(path="products.csv", key=self.product_name, want_unique_value=True)) + "\n")
             products_file.close()
         else:
             # if this 'else' block gets executed, that means entered record is already existed. So we need not to perform any extra activity
@@ -59,7 +70,8 @@ class Entry:
             self.total_price = -(self.quantity * self.price_per_unit)
         else:
             self.total_price = (self.quantity * self.price_per_unit)
-        datafile.write(str(self.date) + "," + str(self.type_of_entry) + "," + str(self.product_name) + "," + str(self.quantity) + "," + str(self.price_per_unit) + "," +
+        datafile.write(str(self.date) + "," + str(self.type_of_entry) + "," + str(self.product_name) + "," + str(
+            self.quantity) + "," + str(self.price_per_unit) + "," +
                        str(self.total_price) + "," + str(self.description) + "\n")
         datafile.close()
 
@@ -90,7 +102,8 @@ class Entry:
         return Entry.total_sell
 
     @staticmethod
-    def predict_profit(day1=datetime.now().day, month1=datetime.now().month, year1=datetime.now().year, day2=None, month2=None, year2=None, products=name_of_products):
+    def predict_profit(day1=datetime.now().day, month1=datetime.now().month, year1=datetime.now().year, day2=None,
+                       month2=None, year2=None, products=name_of_products):
         """This method will predict the profit from individual product in given period of time i.e. from date day1/month1/year1 to day2/mont2/year2"""
 
         predicted = {}
@@ -104,16 +117,47 @@ class Entry:
             predicted[product] = 0
             date = temp
             while date != lastdate + timedelta(days=1):
-                predicted[product] += float(model.predict([[date.day, date.month, date.year, products_dict[product], map[product][0],
-                                                            map[product][0] + map[product][1]]]))
+                predicted[product] += float(
+                    model.predict([[date.day, date.month, date.year, products_dict[product], map[product][0],
+                                    map[product][0] + map[product][1]]]))
                 date += timedelta(days=1)
         return predicted
+
+    @staticmethod
+    def add_task(day=datetime.now().day, month=datetime.now().month, year=datetime.now().year, hour=datetime.now().hour,
+                 minute=datetime.now().minute + 10, description=None):
+        """This method will add task to be done at Date:day/month/year & Time:hour/minute"""
+
+        with open("dataToDoList.csv", "a") as todofile:
+            todofile.write(str(datetime(day=day, month=month, year=year, hour=hour, minute=minute)) + "," + str(
+                description) + "\n")
+            todofile.close()
+
+    @staticmethod
+    def remind():
+        """This method will fetch the tasks to be done from todo list & should be called repeatedly"""
+
+        todo_list = pd.read_csv("dataToDoList.csv")
+        todo_list['Time'] = pd.to_datetime(todo_list['Time'])
+        tasks = todo_list.loc[todo_list['Time'] <= datetime.now()]
+        print(tasks)
+
+    @staticmethod
+    def delete_task(delete_task_index):
+        """This will delete the todo task at specified index i.e. delete_task_index parameter"""
+
+        todofile = pd.read_csv("dataToDoList.csv", index_col=None)
+        try:
+            todofile.drop(todofile.index[delete_task_index], inplace=True)
+        except IndexError:
+            print("Index out of bound...!!!")
+        todofile.to_csv("dataToDoList.csv", index=False)
 
 
 if __name__ == "__main__":
     while True:
         print("======================================================")
-        print("\n1:sell\n2:buy\n3:delete\n4:predict\n5:exit\n")
+        print("\n1:sell\n2:buy\n3:delete\n4:predict\n5:Add Task in ToDo\n6:Remind Tasks\n7:Delete Task\n8:exit\n")
         Entry.total_buy_method()
         Entry.total_sell_method()
         print("total sell =" + str(Entry.total_sell))
@@ -130,6 +174,20 @@ if __name__ == "__main__":
             continue
         elif c == 4:
             print(Entry.predict_profit())
+            continue
+        elif c == 5:
+            minute = int(input("Enter minute:"))
+            description = input("Enter Description:")
+            Entry.add_task(minute=minute, description=description)
+            continue
+        elif c == 6:
+            Entry.remind()
+            continue
+        elif c == 7:
+            todo = pd.read_csv("dataToDoList.csv")
+            print(todo)
+            index = int(input("Enter id of entry to delete:"))
+            Entry.delete_task(index)
             continue
         else:
             print("======================================================\n")
