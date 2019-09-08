@@ -1,4 +1,6 @@
 # Journal
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
 It is a Desktop application for medium scale businesses to keep an eye on daily expense in a very efficient way.
 
 The goal of this application is to predict and suggest them product wise profit so that businesses can maximize their profit. Currently we are on the developing stage.
